@@ -1,0 +1,12 @@
+services:
+  app:
+    build:
+      context: .
+      target: builder
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    command: go run ./cmd/server
+    env_file:
+      - .env.development
