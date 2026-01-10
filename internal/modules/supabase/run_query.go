@@ -1,25 +1,22 @@
 package supabase
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 
+	"github.com/shibaleo/go-mcp-dev/internal/httpclient"
 	"github.com/shibaleo/go-mcp-dev/internal/mcp"
 )
 
 type RunQueryTool struct {
 	accessToken string
-	httpClient  *http.Client
+	client      *httpclient.Client
 }
 
 func NewRunQueryTool() *RunQueryTool {
 	return &RunQueryTool{
 		accessToken: os.Getenv("SUPABASE_ACCESS_TOKEN"),
-		httpClient:  &http.Client{},
+		client:      httpclient.New(),
 	}
 }
 
@@ -55,49 +52,18 @@ func (t *RunQueryTool) Execute(args map[string]interface{}) (string, error) {
 		return "", fmt.Errorf("query must be a string")
 	}
 
-	// Supabase Management API endpoint
 	url := fmt.Sprintf("https://api.supabase.com/v1/projects/%s/database/query", projectRef)
 
+	headers := map[string]string{
+		"Authorization": "Bearer " + t.accessToken,
+	}
+
 	payload := map[string]string{"query": query}
-	body, err := json.Marshal(payload)
+
+	respBody, err := t.client.DoJSON("POST", url, headers, payload)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal request: %w", err)
+		return "", err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewReader(body))
-	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Authorization", "Bearer "+t.accessToken)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := t.httpClient.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to execute request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to read response: %w", err)
-	}
-
-	// 200 OK and 201 Created are both success
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return "", fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(respBody))
-	}
-
-	// Pretty print JSON response
-	var result interface{}
-	if err := json.Unmarshal(respBody, &result); err != nil {
-		return string(respBody), nil
-	}
-
-	prettyJSON, err := json.MarshalIndent(result, "", "  ")
-	if err != nil {
-		return string(respBody), nil
-	}
-
-	return string(prettyJSON), nil
+	return httpclient.PrettyJSON(respBody), nil
 }

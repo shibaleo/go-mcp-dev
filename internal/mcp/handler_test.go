@@ -3,6 +3,7 @@ package mcp
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -229,5 +230,71 @@ func TestServeHTTP_MethodNotAllowed(t *testing.T) {
 
 	if rec.Code != http.StatusMethodNotAllowed {
 		t.Errorf("expected status %d, got %d", http.StatusMethodNotAllowed, rec.Code)
+	}
+}
+
+func TestHandleInlineMessage_ToolCallError(t *testing.T) {
+	handler := NewHandler()
+	handler.RegisterTool(&MockTool{
+		name: "error_tool",
+		err:  fmt.Errorf("tool execution failed"),
+	})
+
+	reqBody := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"error_tool","arguments":{}}}`
+
+	req := httptest.NewRequest("POST", "/mcp", bytes.NewBufferString(reqBody))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	handler.handleInlineMessage(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected status %d, got %d", http.StatusOK, rec.Code)
+	}
+
+	var resp Response
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+
+	// Tool errors are returned as result with isError=true, not as JSON-RPC error
+	if resp.Error != nil {
+		t.Errorf("unexpected JSON-RPC error: %v", resp.Error)
+	}
+
+	resultMap, ok := resp.Result.(map[string]interface{})
+	if !ok {
+		t.Fatalf("unexpected result type: %T", resp.Result)
+	}
+
+	isError, ok := resultMap["isError"].(bool)
+	if !ok || !isError {
+		t.Error("expected isError to be true")
+	}
+}
+
+func TestHandleInlineMessage_InvalidParams(t *testing.T) {
+	handler := NewHandler()
+
+	// tools/call with missing params
+	reqBody := `{"jsonrpc":"2.0","id":1,"method":"tools/call"}`
+
+	req := httptest.NewRequest("POST", "/mcp", bytes.NewBufferString(reqBody))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	handler.handleInlineMessage(rec, req)
+
+	var resp Response
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+
+	if resp.Error == nil {
+		t.Fatal("expected error, got nil")
+	}
+
+	if resp.Error.Code != InvalidParams {
+		t.Errorf("expected error code %d, got %d", InvalidParams, resp.Error.Code)
 	}
 }
