@@ -92,3 +92,17 @@ func PrettyJSON(data []byte) string {
 
 	return string(prettyJSON)
 }
+
+// PrettyJSONFromInterface formats an interface{} as pretty JSON
+func PrettyJSONFromInterface(data interface{}) string {
+	prettyJSON, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return fmt.Sprintf("%v", data)
+	}
+	return string(prettyJSON)
+}
+
+// UnmarshalJSON unmarshals JSON bytes into a target interface
+func UnmarshalJSON(data []byte, v interface{}) error {
+	return json.Unmarshal(data, v)
+}

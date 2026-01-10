@@ -8,6 +8,10 @@ import (
 	"github.com/shibaleo/go-mcp-dev/internal/auth"
 	"github.com/shibaleo/go-mcp-dev/internal/mcp"
 	"github.com/shibaleo/go-mcp-dev/internal/modules"
+	"github.com/shibaleo/go-mcp-dev/internal/modules/confluence"
+	"github.com/shibaleo/go-mcp-dev/internal/modules/github"
+	"github.com/shibaleo/go-mcp-dev/internal/modules/jira"
+	"github.com/shibaleo/go-mcp-dev/internal/modules/notion"
 	"github.com/shibaleo/go-mcp-dev/internal/modules/supabase"
 	"github.com/shibaleo/go-mcp-dev/internal/observability"
 )
@@ -18,6 +22,10 @@ func main() {
 
 	// Register modules
 	modules.Register(supabase.Module())
+	modules.Register(notion.Module())
+	modules.Register(github.Module())
+	modules.Register(jira.Module())
+	modules.Register(confluence.Module())
 
 	port := os.Getenv("PORT")
 	if port == "" {
