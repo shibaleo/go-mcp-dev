@@ -35,6 +35,8 @@ func Module() modules.ModuleDefinition {
 	return modules.ModuleDefinition{
 		Name:        "github",
 		Description: "GitHub API - リポジトリ、Issue、PR、Actions、検索",
+		APIVersion:  githubAPIVersion,
+		TestedAt:    "2026-01-10",
 		Tools:       tools,
 		Handlers:    handlers,
 	}

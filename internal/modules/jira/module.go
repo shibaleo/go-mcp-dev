@@ -10,7 +10,10 @@ import (
 	"github.com/shibaleo/go-mcp-dev/internal/modules"
 )
 
-const jiraAPIPath = "/rest/api/3"
+const (
+	jiraAPIPath    = "/rest/api/3"
+	jiraAPIVersion = "3" // Jira Cloud REST API version
+)
 
 var client = httpclient.New()
 
@@ -43,6 +46,8 @@ func Module() modules.ModuleDefinition {
 	return modules.ModuleDefinition{
 		Name:        "jira",
 		Description: "Jira API - Issue/Project操作（検索、作成、更新、コメント、ワークログ）",
+		APIVersion:  jiraAPIVersion,
+		TestedAt:    "2026-01-10",
 		Tools:       tools,
 		Handlers:    handlers,
 	}

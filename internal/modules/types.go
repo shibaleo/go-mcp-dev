@@ -20,10 +20,23 @@ type Property struct {
 	Description string `json:"description"`
 }
 
-// ModuleDefinition defines a module with its tools and handlers
+// ModuleDefinition defines a module with its tools and handlers.
+//
+// APIVersion is the external API's official version string (NOT semver).
+// Examples:
+//   - Supabase: "v1" (URL path)
+//   - Notion: "2022-06-28" (Notion-Version header)
+//   - GitHub: "2022-11-28" (X-GitHub-Api-Version header)
+//   - Jira: "3" (URL path /rest/api/3)
+//   - Confluence: "v2" (URL path /wiki/api/v2)
+//
+// TestedAt is the date when this module was last verified to work (YYYY-MM-DD).
+// Update this manually after confirming the module works with the API.
 type ModuleDefinition struct {
 	Name        string
 	Description string
+	APIVersion  string
+	TestedAt    string
 	Tools       []Tool
 	Handlers    map[string]ToolHandler
 }

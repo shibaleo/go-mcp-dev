@@ -33,6 +33,8 @@ func Module() modules.ModuleDefinition {
 	return modules.ModuleDefinition{
 		Name:        "notion",
 		Description: "Notion API - ページ・データベース・ブロック操作",
+		APIVersion:  notionVersion,
+		TestedAt:    "2026-01-10",
 		Tools:       tools,
 		Handlers:    handlers,
 	}

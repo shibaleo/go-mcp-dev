@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	confluenceAPIV2 = "/wiki/api/v2"
-	confluenceAPIV1 = "/wiki/rest/api"
+	confluenceAPIV2      = "/wiki/api/v2"
+	confluenceAPIV1      = "/wiki/rest/api"
+	confluenceAPIVersion = "v2" // Primary API version (v2), with v1 fallback for some endpoints
 )
 
 var client = httpclient.New()
@@ -51,6 +52,8 @@ func Module() modules.ModuleDefinition {
 	return modules.ModuleDefinition{
 		Name:        "confluence",
 		Description: "Confluence API - Wiki操作（スペース、ページ、検索、コメント、ラベル）",
+		APIVersion:  confluenceAPIVersion,
+		TestedAt:    "2026-01-10",
 		Tools:       tools,
 		Handlers:    handlers,
 	}

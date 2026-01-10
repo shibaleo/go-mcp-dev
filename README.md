@@ -192,8 +192,33 @@ koyeb service update go-mcp-dev/go-mcp-dev --env KEY=VALUE
 ## CI/CD
 
 - **PR時**: ビルド・テスト実行
-- **main push時**: Koyeb自動再デプロイ + ヘルスチェック
+- **main push時**: Koyeb自動再デプロイ + ヘルスチェック + APIバージョンチェック
 - **45分ごと**: GitHub Actionsからping（スリープ回避）
+
+## APIバージョン管理
+
+各モジュールは外部APIの公式バージョン文字列をそのまま記録する（semverではない）。
+
+| モジュール | APIVersion | 形式 |
+|-----------|------------|------|
+| Supabase | `v1` | URLパス (`/v1/`) |
+| Notion | `2022-06-28` | ヘッダー (`Notion-Version`) |
+| GitHub | `2022-11-28` | ヘッダー (`X-GitHub-Api-Version`) |
+| Jira | `3` | URLパス (`/rest/api/3`) |
+| Confluence | `v2` | URLパス (`/wiki/api/v2`) |
+
+### バージョンチェック
+
+```bash
+# ローカルで実行
+go run ./cmd/version-check
+
+# CIで自動実行（main push時）
+# 各APIに実際にリクエストを送り、バージョン互換性を確認
+```
+
+- `TestedAt`: 最終動作確認日（手動更新）
+- 不一致検出時: CIが失敗（exit code 2）
 
 ## ライセンス
 

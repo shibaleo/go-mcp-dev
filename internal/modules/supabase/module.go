@@ -29,6 +29,8 @@ func Module() modules.ModuleDefinition {
 	return modules.ModuleDefinition{
 		Name:        "supabase",
 		Description: "Supabase Management API - プロジェクト管理、DB操作、マイグレーション、ログ、ストレージ",
+		APIVersion:  "v1",
+		TestedAt:    "2026-01-10",
 		Tools:       tools,
 		Handlers:    handlers,
 	}

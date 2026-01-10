@@ -21,3 +21,30 @@ jobs:
 
       - name: Test
         run: go test -v ./...
+
+  version-check:
+    runs-on: ubuntu-latest
+    # Only run on main push (not PRs) to avoid exposing secrets
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build version-check
+        run: go build -o version-check ./cmd/version-check
+
+      - name: Run API version check
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}
+          JIRA_DOMAIN: ${{ secrets.JIRA_DOMAIN }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          CONFLUENCE_DOMAIN: ${{ secrets.CONFLUENCE_DOMAIN }}
+          CONFLUENCE_EMAIL: ${{ secrets.CONFLUENCE_EMAIL }}
+          CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
+        run: ./version-check
