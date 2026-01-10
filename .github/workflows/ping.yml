@@ -1,0 +1,16 @@
+name: Keep Alive Ping
+
+on:
+  schedule:
+    # Every 45 minutes
+    - cron: '*/45 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Health Check Ping
+        run: |
+          curl -f https://shibaleo-dev.mcpist.app/health || exit 1
+          echo "Ping successful at $(date)"

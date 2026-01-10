@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on:
   pull_request:
@@ -21,3 +21,21 @@ jobs:
 
       - name: Test
         run: go test -v ./...
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Koyeb Redeploy
+        run: |
+          curl -X POST "https://app.koyeb.com/v1/services/${{ secrets.KOYEB_SERVICE_ID }}/redeploy" \
+            -H "Authorization: Bearer ${{ secrets.KOYEB_API_TOKEN }}" \
+            -H "Content-Type: application/json"
+
+      - name: Wait for deployment
+        run: sleep 60
+
+      - name: Health Check
+        run: |
+          curl -f https://shibaleo-dev.mcpist.app/health || exit 1
