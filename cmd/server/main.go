@@ -7,6 +7,7 @@ import (
 
 	"github.com/shibaleo/go-mcp-dev/internal/auth"
 	"github.com/shibaleo/go-mcp-dev/internal/mcp"
+	"github.com/shibaleo/go-mcp-dev/internal/modules"
 	"github.com/shibaleo/go-mcp-dev/internal/modules/supabase"
 	"github.com/shibaleo/go-mcp-dev/internal/observability"
 )
@@ -15,14 +16,15 @@ func main() {
 	// Initialize Loki client
 	observability.Init()
 
+	// Register modules
+	modules.Register(supabase.Module())
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
 	handler := mcp.NewHandler()
-	handler.RegisterTool(supabase.NewListProjectsTool())
-	handler.RegisterTool(supabase.NewRunQueryTool())
 
 	authMiddleware := auth.NewMiddleware(os.Getenv("INTERNAL_SECRET"))
 

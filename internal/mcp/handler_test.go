@@ -3,35 +3,37 @@ package mcp
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/shibaleo/go-mcp-dev/internal/modules"
 )
 
-// MockTool for testing
-type MockTool struct {
-	name   string
-	result string
-	err    error
-}
-
-func (m *MockTool) Definition() Tool {
-	return Tool{
-		Name:        m.name,
-		Description: "Mock tool for testing",
-		InputSchema: InputSchema{
-			Type:       "object",
-			Properties: map[string]Property{},
+func init() {
+	// Register a test module for testing
+	modules.Register(modules.ModuleDefinition{
+		Name:        "test",
+		Description: "Test module",
+		Tools: []modules.Tool{
+			{
+				Name:        "echo",
+				Description: "Echo back the input",
+				InputSchema: modules.InputSchema{
+					Type: "object",
+					Properties: map[string]modules.Property{
+						"message": {Type: "string", Description: "Message to echo"},
+					},
+				},
+			},
 		},
-	}
-}
-
-func (m *MockTool) Execute(args map[string]interface{}) (string, error) {
-	if m.err != nil {
-		return "", m.err
-	}
-	return m.result, nil
+		Handlers: map[string]modules.ToolHandler{
+			"echo": func(params map[string]interface{}) (string, error) {
+				msg, _ := params["message"].(string)
+				return "Echo: " + msg, nil
+			},
+		},
+	})
 }
 
 func TestHandleInlineMessage_Initialize(t *testing.T) {
@@ -64,7 +66,6 @@ func TestHandleInlineMessage_Initialize(t *testing.T) {
 
 	result, ok := resp.Result.(*InitializeResult)
 	if !ok {
-		// Result might be map[string]interface{} after JSON round-trip
 		resultMap, ok := resp.Result.(map[string]interface{})
 		if !ok {
 			t.Fatalf("unexpected result type: %T", resp.Result)
@@ -81,7 +82,6 @@ func TestHandleInlineMessage_Initialize(t *testing.T) {
 
 func TestHandleInlineMessage_ToolsList(t *testing.T) {
 	handler := NewHandler()
-	handler.RegisterTool(&MockTool{name: "test_tool", result: "ok"})
 
 	reqBody := `{"jsonrpc":"2.0","id":1,"method":"tools/list"}`
 
@@ -114,16 +114,16 @@ func TestHandleInlineMessage_ToolsList(t *testing.T) {
 		t.Fatalf("unexpected tools type: %T", resultMap["tools"])
 	}
 
-	if len(tools) != 1 {
-		t.Errorf("expected 1 tool, got %d", len(tools))
+	// Should return 2 meta tools: get_module_schema and call_module_tool
+	if len(tools) != 2 {
+		t.Errorf("expected 2 meta tools, got %d", len(tools))
 	}
 }
 
-func TestHandleInlineMessage_ToolCall(t *testing.T) {
+func TestHandleInlineMessage_GetModuleSchema(t *testing.T) {
 	handler := NewHandler()
-	handler.RegisterTool(&MockTool{name: "test_tool", result: "success result"})
 
-	reqBody := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"test_tool","arguments":{}}}`
+	reqBody := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_module_schema","arguments":{"module":"test"}}}`
 
 	req := httptest.NewRequest("POST", "/mcp", bytes.NewBufferString(reqBody))
 	req.Header.Set("Content-Type", "application/json")
@@ -142,6 +142,57 @@ func TestHandleInlineMessage_ToolCall(t *testing.T) {
 
 	if resp.Error != nil {
 		t.Errorf("unexpected error: %v", resp.Error)
+	}
+
+	resultMap, ok := resp.Result.(map[string]interface{})
+	if !ok {
+		t.Fatalf("unexpected result type: %T", resp.Result)
+	}
+
+	content, ok := resultMap["content"].([]interface{})
+	if !ok || len(content) == 0 {
+		t.Fatal("expected content in result")
+	}
+}
+
+func TestHandleInlineMessage_CallModuleTool(t *testing.T) {
+	handler := NewHandler()
+
+	reqBody := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"call_module_tool","arguments":{"module":"test","tool_name":"echo","params":{"message":"hello"}}}}`
+
+	req := httptest.NewRequest("POST", "/mcp", bytes.NewBufferString(reqBody))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	handler.handleInlineMessage(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected status %d, got %d", http.StatusOK, rec.Code)
+	}
+
+	var resp Response
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+
+	if resp.Error != nil {
+		t.Errorf("unexpected error: %v", resp.Error)
+	}
+
+	resultMap, ok := resp.Result.(map[string]interface{})
+	if !ok {
+		t.Fatalf("unexpected result type: %T", resp.Result)
+	}
+
+	content, ok := resultMap["content"].([]interface{})
+	if !ok || len(content) == 0 {
+		t.Fatal("expected content in result")
+	}
+
+	firstContent := content[0].(map[string]interface{})
+	text := firstContent["text"].(string)
+	if text != "Echo: hello" {
+		t.Errorf("expected 'Echo: hello', got '%s'", text)
 	}
 }
 
@@ -233,14 +284,10 @@ func TestServeHTTP_MethodNotAllowed(t *testing.T) {
 	}
 }
 
-func TestHandleInlineMessage_ToolCallError(t *testing.T) {
+func TestHandleInlineMessage_UnknownModule(t *testing.T) {
 	handler := NewHandler()
-	handler.RegisterTool(&MockTool{
-		name: "error_tool",
-		err:  fmt.Errorf("tool execution failed"),
-	})
 
-	reqBody := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"error_tool","arguments":{}}}`
+	reqBody := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_module_schema","arguments":{"module":"nonexistent"}}}`
 
 	req := httptest.NewRequest("POST", "/mcp", bytes.NewBufferString(reqBody))
 	req.Header.Set("Content-Type", "application/json")
@@ -248,16 +295,11 @@ func TestHandleInlineMessage_ToolCallError(t *testing.T) {
 
 	handler.handleInlineMessage(rec, req)
 
-	if rec.Code != http.StatusOK {
-		t.Errorf("expected status %d, got %d", http.StatusOK, rec.Code)
-	}
-
 	var resp Response
 	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
 		t.Fatalf("failed to unmarshal response: %v", err)
 	}
 
-	// Tool errors are returned as result with isError=true, not as JSON-RPC error
 	if resp.Error != nil {
 		t.Errorf("unexpected JSON-RPC error: %v", resp.Error)
 	}
@@ -267,9 +309,9 @@ func TestHandleInlineMessage_ToolCallError(t *testing.T) {
 		t.Fatalf("unexpected result type: %T", resp.Result)
 	}
 
-	isError, ok := resultMap["isError"].(bool)
-	if !ok || !isError {
-		t.Error("expected isError to be true")
+	isError, _ := resultMap["isError"].(bool)
+	if !isError {
+		t.Error("expected isError to be true for unknown module")
 	}
 }
 

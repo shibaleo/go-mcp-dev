@@ -1,5 +1,7 @@
 package mcp
 
+import "github.com/shibaleo/go-mcp-dev/internal/modules"
+
 // JSON-RPC 2.0 Request
 type Request struct {
 	JSONRPC string      `json:"jsonrpc"`
@@ -74,25 +76,8 @@ type ServerInfo struct {
 	Version string `json:"version"`
 }
 
-type Tool struct {
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	InputSchema InputSchema `json:"inputSchema"`
-}
-
-type InputSchema struct {
-	Type       string              `json:"type"`
-	Properties map[string]Property `json:"properties"`
-	Required   []string            `json:"required,omitempty"`
-}
-
-type Property struct {
-	Type        string `json:"type"`
-	Description string `json:"description"`
-}
-
 type ToolsListResult struct {
-	Tools []Tool `json:"tools"`
+	Tools []modules.Tool `json:"tools"`
 }
 
 type ToolCallParams struct {
@@ -100,18 +85,6 @@ type ToolCallParams struct {
 	Arguments map[string]interface{} `json:"arguments"`
 }
 
-type ToolCallResult struct {
-	Content []ContentBlock `json:"content"`
-	IsError bool           `json:"isError,omitempty"`
-}
-
-type ContentBlock struct {
-	Type string `json:"type"`
-	Text string `json:"text"`
-}
-
-// ToolExecutor interface for tool implementations
-type ToolExecutor interface {
-	Execute(args map[string]interface{}) (string, error)
-	Definition() Tool
-}
+// Use modules.ToolCallResult and modules.ContentBlock instead
+type ToolCallResult = modules.ToolCallResult
+type ContentBlock = modules.ContentBlock

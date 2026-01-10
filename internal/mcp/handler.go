@@ -7,13 +7,11 @@ import (
 	"log"
 	"net/http"
 	"sync"
-	"time"
 
-	"github.com/shibaleo/go-mcp-dev/internal/observability"
+	"github.com/shibaleo/go-mcp-dev/internal/modules"
 )
 
 type Handler struct {
-	tools    map[string]ToolExecutor
 	sessions map[string]*Session
 	mu       sync.RWMutex
 }
@@ -28,14 +26,8 @@ type Session struct {
 
 func NewHandler() *Handler {
 	return &Handler{
-		tools:    make(map[string]ToolExecutor),
 		sessions: make(map[string]*Session),
 	}
-}
-
-func (h *Handler) RegisterTool(tool ToolExecutor) {
-	def := tool.Definition()
-	h.tools[def.Name] = tool
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -88,7 +80,6 @@ func (h *Handler) handleSSE(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	// Send endpoint event (MCP SSE protocol)
-	// The endpoint tells the client where to POST messages
 	fmt.Fprintf(w, "event: endpoint\ndata: /mcp?sessionId=%s\n\n", sessionID)
 	flusher.Flush()
 	log.Printf("SSE connection established, session=%s", sessionID)
@@ -109,7 +100,6 @@ func (h *Handler) handleSSE(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleMessage(w http.ResponseWriter, r *http.Request) {
 	sessionID := r.URL.Query().Get("sessionId")
 	if sessionID == "" {
-		// For simple single-session mode, use first available session or create inline response
 		h.handleInlineMessage(w, r)
 		return
 	}
@@ -148,7 +138,6 @@ func (h *Handler) handleMessage(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
-// handleInlineMessage handles POST requests without SSE (for simple testing)
 func (h *Handler) handleInlineMessage(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -221,22 +210,17 @@ func (h *Handler) handleInitialize(req *Request) *InitializeResult {
 		},
 		ServerInfo: ServerInfo{
 			Name:    "go-mcp-dev",
-			Version: "0.1.0",
+			Version: "0.2.0",
 		},
 	}
 }
 
 func (h *Handler) handleToolsList() *ToolsListResult {
-	tools := make([]Tool, 0, len(h.tools))
-	for _, executor := range h.tools {
-		tools = append(tools, executor.Definition())
-	}
-	return &ToolsListResult{Tools: tools}
+	// Return only meta tools (lazy loading)
+	return &ToolsListResult{Tools: modules.MetaTools()}
 }
 
 func (h *Handler) handleToolCall(req *Request) (*ToolCallResult, *Error) {
-	start := time.Now()
-
 	paramsBytes, err := json.Marshal(req.Params)
 	if err != nil {
 		return nil, &Error{Code: InvalidParams, Message: "Invalid params"}
@@ -247,34 +231,50 @@ func (h *Handler) handleToolCall(req *Request) (*ToolCallResult, *Error) {
 		return nil, &Error{Code: InvalidParams, Message: "Invalid params structure"}
 	}
 
-	executor, ok := h.tools[params.Name]
-	if !ok {
+	switch params.Name {
+	case "get_module_schema":
+		return h.handleGetModuleSchema(params.Arguments)
+	case "call_module_tool":
+		return h.handleCallModuleTool(params.Arguments)
+	default:
 		return nil, &Error{Code: InvalidParams, Message: fmt.Sprintf("Unknown tool: %s", params.Name)}
 	}
-
-	// Extract module name from tool name (e.g., "supabase_run_query" -> "supabase")
-	module := "unknown"
-	for i, c := range params.Name {
-		if c == '_' {
-			module = params.Name[:i]
-			break
-		}
-	}
-
-	result, err := executor.Execute(params.Arguments)
-	durationMs := time.Since(start).Milliseconds()
-
-	if err != nil {
-		observability.LogToolCall(module, params.Name, durationMs, "error", err.Error())
-		return &ToolCallResult{
-			Content: []ContentBlock{{Type: "text", Text: err.Error()}},
-			IsError: true,
-		}, nil
-	}
-
-	observability.LogToolCall(module, params.Name, durationMs, "success", "")
-	return &ToolCallResult{
-		Content: []ContentBlock{{Type: "text", Text: result}},
-	}, nil
 }
 
+func (h *Handler) handleGetModuleSchema(args map[string]interface{}) (*ToolCallResult, *Error) {
+	moduleName, ok := args["module"].(string)
+	if !ok {
+		return nil, &Error{Code: InvalidParams, Message: "module must be a string"}
+	}
+
+	result, err := modules.GetModuleSchema(moduleName)
+	if err != nil {
+		return nil, &Error{Code: InternalError, Message: err.Error()}
+	}
+
+	return result, nil
+}
+
+func (h *Handler) handleCallModuleTool(args map[string]interface{}) (*ToolCallResult, *Error) {
+	moduleName, ok := args["module"].(string)
+	if !ok {
+		return nil, &Error{Code: InvalidParams, Message: "module must be a string"}
+	}
+
+	toolName, ok := args["tool_name"].(string)
+	if !ok {
+		return nil, &Error{Code: InvalidParams, Message: "tool_name must be a string"}
+	}
+
+	params, _ := args["params"].(map[string]interface{})
+	if params == nil {
+		params = make(map[string]interface{})
+	}
+
+	result, err := modules.CallModuleTool(moduleName, toolName, params)
+	if err != nil {
+		return nil, &Error{Code: InternalError, Message: err.Error()}
+	}
+
+	return result, nil
+}
