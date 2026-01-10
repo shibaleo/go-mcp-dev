@@ -372,7 +372,7 @@ func main() {
 			hasMismatch = true
 			fmt.Fprintf(os.Stderr, "MISMATCH: %s - expected %s, got %s\n", r.Module, r.Expected, r.Actual)
 		case "ok":
-			fmt.Fprintf(os.Stderr, "OK: %s (v%s, tested %s)\n", r.Module, r.Expected, r.TestedAt)
+			fmt.Fprintf(os.Stderr, "OK: %s (%s, tested %s)\n", r.Module, r.Expected, r.TestedAt)
 		case "skip":
 			fmt.Fprintf(os.Stderr, "SKIP: %s - %s\n", r.Module, r.Message)
 		}
