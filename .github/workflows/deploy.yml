@@ -1,0 +1,21 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Koyeb Redeploy
+        run: |
+          curl -X POST "https://app.koyeb.com/v1/services/${{ secrets.KOYEB_SERVICE_ID }}/redeploy" \
+            -H "Authorization: Bearer ${{ secrets.KOYEB_API_TOKEN }}" \
+            -H "Content-Type: application/json"
+
+      - name: Wait for deployment
+        run: sleep 60
+
+      - name: Health Check
+        run: |
+          curl -f https://shibaleo-dev.mcpist.app/health || exit 1
