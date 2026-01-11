@@ -1,5 +1,12 @@
 # go-mcp-dev
 
+## MCPist: Managing Context Personally
+
+**MCPist is a personal context management tool for power users who want to precisely control what an LLM can see and do, beyond the average context provided by MCP.**
+
+MCP is the protocol.
+MCPist is how I live with it.
+
 Go言語で実装したMCP (Model Context Protocol) サーバー。Claude CodeなどのLLMクライアントから外部APIを操作するためのシングルテナント用ツール。
 
 ## 特徴
