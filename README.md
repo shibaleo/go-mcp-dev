@@ -9,6 +9,57 @@ MCPist is how I live with it.
 
 Go言語で実装したMCP (Model Context Protocol) サーバー。Claude CodeなどのLLMクライアントから外部APIを操作するためのシングルテナント用ツール。
 
+---
+
+## Why MCPist? The Vendor Lock-in Problem
+
+Model Context Protocol (MCP) は「AI界のUSB-C」として期待されていますが、**2025-11-25の仕様改定により構造的な問題が明確になりました**。
+
+### The Problem: Who Benefits from Portability?
+
+MCP 2025-11-25で導入された**Enterprise-Managed Authorization (XAA)** は、エンタープライズIdP（Okta等）との連携を標準化しました。これにより企業IT管理者は「1箇所」でMCP接続を管理できます。
+
+しかし、その「1箇所」はMCPホスト（Claude Desktop, Cursor等）に紐づいています:
+
+```
+User → MCP Host (SSO) → Enterprise IdP → Token → MCP Server
+            ↑
+      ここでロックイン
+```
+
+**結果:**
+- LLMホストを変更 → IdP連携全体を再構築
+- 100個のコネクタ → 100個の認証再設定
+- 移行コスト >> 継続コスト → ベンダーロックイン
+
+詳細: [MCPist Position Statement: MCPの認証モデルとベンダーロックインリスク](https://github.com/shibaleo/go-mcp-dev/blob/main/docs/position-statement.md) *(予定)*
+
+### The Solution: Server-Side Authentication
+
+MCPistは認証をサーバー側（Token Broker）で管理:
+
+```
+User → MCP Host → MCP Server (Token Broker) → External APIs
+                       ↑
+                  認証をここで管理
+```
+
+**利点:**
+- ✅ **LLMホスト変更 → 認証はそのまま** - Claude Desktop → Cursor への移行でも認証再設定不要
+- ✅ **IdP連携もサーバー側** - ホスト依存なし
+- ✅ **LLM選択の自由** - Claude/GPT/Gemini/Ollama を自由に切り替え（Phase 2）
+- ✅ **真のポータビリティ** - MCPの本来の理念を実現
+
+**Phase 1（現在）:** Claude Desktop/Cursor用のポータブルMCPサーバー
+**Phase 2（予定）:** Host層を含めた完全ポータビリティ（MCPist Desktop）
+
+参照:
+- [ADR-005: RLSに依存しない認可設計](./dev/ADR-005-no-rls-dependency.md) - Token Brokerによるサーバー側認証
+- [ADR-007: Host層を含めた完全ポータビリティの実現](./dev/ADR-007-host-layer-portability.md) - MCPist Desktopのビジョン
+- [ADR-008: LLM API抽象化層によるクライアント側ポータビリティ](./dev/ADR-008-llm-api-abstraction.md) - LLM選択の自由
+
+---
+
 ## 特徴
 
 - **Go + SSE**: 軽量・高速なJSON-RPC 2.0 over Server-Sent Events
