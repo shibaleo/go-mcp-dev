@@ -8,6 +8,7 @@ import (
 	"github.com/shibaleo/go-mcp-dev/internal/auth"
 	"github.com/shibaleo/go-mcp-dev/internal/mcp"
 	"github.com/shibaleo/go-mcp-dev/internal/modules"
+	"github.com/shibaleo/go-mcp-dev/internal/modules/airtable"
 	"github.com/shibaleo/go-mcp-dev/internal/modules/confluence"
 	"github.com/shibaleo/go-mcp-dev/internal/modules/github"
 	"github.com/shibaleo/go-mcp-dev/internal/modules/jira"
@@ -26,6 +27,7 @@ func main() {
 	modules.Register(github.Module())
 	modules.Register(jira.Module())
 	modules.Register(confluence.Module())
+	modules.Register(airtable.Module())
 
 	port := os.Getenv("PORT")
 	if port == "" {
