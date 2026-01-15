@@ -186,6 +186,7 @@
   },
   "active": "6fd2896e6c8ac968",
   "lastOpenFiles": [
+    "DAY6/ui-prototype-review.md",
     "DAY6/prompt-fix.md",
     "DAY6/admin-panel-design-1/tsconfig.json",
     "DAY6/admin-panel-design-1/styles/globals.css",
@@ -230,7 +231,6 @@
     "spec-req.md",
     "spec-sys.md",
     "ADR-006-module-centric-primitives.md",
-    "ADR-008-llm-api-abstraction.md",
-    "ADR-007-host-layer-portability.md"
+    "ADR-008-llm-api-abstraction.md"
   ]
 }
