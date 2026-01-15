@@ -1,0 +1,236 @@
+{
+  "main": {
+    "id": "85a1ff7ca760289a",
+    "type": "split",
+    "children": [
+      {
+        "id": "a7432210b9b27ee8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6fd2896e6c8ac968",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "DAY6/dsn-usr-ifc.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "dsn-usr-ifc"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "f011b37b4253d01e",
+    "type": "split",
+    "children": [
+      {
+        "id": "155b682812e10f61",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "62649df7dffb3c03",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "4c5b7b593b050c88",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "f373a653dd4e71d2",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 276.5,
+    "collapsed": true
+  },
+  "right": {
+    "id": "c2f92899e43c8028",
+    "type": "split",
+    "children": [
+      {
+        "id": "aaa28a0160c68b11",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "67d0d9da2957814e",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "round0-implementation-plan.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for round0-implementation-plan"
+            }
+          },
+          {
+            "id": "5adfe9192da1aa43",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "round0-implementation-plan.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from round0-implementation-plan"
+            }
+          },
+          {
+            "id": "13369bcfcea7022c",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "561ba6ab562cdb4c",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "abd1a21a2367e469",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "round0-implementation-plan.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of round0-implementation-plan"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "6fd2896e6c8ac968",
+  "lastOpenFiles": [
+    "DAY6/prompt-fix.md",
+    "DAY6/admin-panel-design-1/tsconfig.json",
+    "DAY6/admin-panel-design-1/styles/globals.css",
+    "DAY6/admin-panel-design-1/styles",
+    "DAY6/admin-panel-design-1/public/placeholder.svg",
+    "DAY6/admin-panel-design-1/public/placeholder.jpg",
+    "DAY6/admin-panel-design-1/public/icon.svg",
+    "DAY6/admin-panel-design-1/public/placeholder-user.jpg",
+    "DAY6/admin-panel-design-1/public/placeholder-logo.svg",
+    "DAY6/admin-panel-design-1/public/placeholder-logo.png",
+    "DAY6/admin-panel-design-1/public/icon-light-32x32.png",
+    "DAY6/admin-panel-design-1/public/icon-dark-32x32.png",
+    "DAY6/admin-panel-design-1/public/apple-icon.png",
+    "DAY6/admin-panel-design-1/public",
+    "DAY6/admin-panel-design-1/postcss.config.mjs",
+    "DAY6/admin-panel-design-1/pnpm-lock.yaml",
+    "DAY6/admin-panel-design-1/package.json",
+    "DAY6/admin-panel-design-1/next.config.mjs",
+    "DAY6/admin-panel-design-1/lib/utils.ts",
+    "DAY6/admin-panel-design-1/lib/data.ts",
+    "DAY6/prompt.md",
+    "DAY6/sys-inf.jpg",
+    "DAY6/ARD-009-ui-design-implementation.md",
+    "DAY6/dsn-usr-ifc.md",
+    "DAY6/spec-ifc.md",
+    "DAY6/ARD-008-auth-oauth-server-token-vault-supabase.md",
+    "DAY6/ARD-001-auth-clerk-tokenvault-auth0.md",
+    "DAY3/requirements/req-fnr.md",
+    "DAY5/prefixes.md",
+    "DAY5/007-spec-mnl/spec-mnl.md",
+    "DAY5/dtl-mnl-cor.md",
+    "DAY5/dtl-sys-cor.md",
+    "DAY5/dtl-core.md",
+    "DAY3/requirements/req-summary.md",
+    "DAY5/000-spec-idx/spec-list.md",
+    "DAY5/000-spec-idx/spec-index.md",
+    "DAY5/dtl-tst-cor.md",
+    "DAY5/sprint-retrospective-template.md",
+    "DAY5/work-log.md",
+    "DAY0/prototype-review.md",
+    "DAY0/concept-paper.md",
+    "spec-req.md",
+    "spec-sys.md",
+    "ADR-006-module-centric-primitives.md",
+    "ADR-008-llm-api-abstraction.md",
+    "ADR-007-host-layer-portability.md"
+  ]
+}
