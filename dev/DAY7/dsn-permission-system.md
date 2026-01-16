@@ -520,10 +520,134 @@ type CacheEntry struct {
 
 | 項目 | 理由 |
 |------|------|
-| レートリミット/クォータ | サービス単位課金（月額固定）のため不要 |
 | 監査ログ | 後から非同期実行で追加可能 |
 | 権限の委譲 | ユースケースなし |
 | エラーメッセージi18n | 英語のみで十分（LLMが翻訳） |
+
+---
+
+## Usage Meter（使用量カウンター）
+
+課金実績のカウントを担当するコンポーネント。
+
+### 名称定義
+
+| 名称 | 役割 |
+|------|------|
+| **Usage Meter** | 使用量の計測・記録を担当するコンポーネント |
+| **Usage Controller** | Usage Meterを含む、使用量制御全体を統括するコントローラー |
+
+### 配置場所: Handler（MCPプロトコルハンドラ）
+
+```
+リクエスト
+    │
+    ├─ 1. Auth Middleware（JWT検証、user_id抽出）
+    │
+    ├─ 2. Permission Gate（Tool Sieve、権限チェック）
+    │
+    ├─ 3. Usage Meter: Check ← 事前チェック（Quota/Credit）
+    │
+    ├─ 4. MCP Handler（tools/call処理）
+    │
+    ├─ 5. Module Registry（ルーティング）
+    │
+    ├─ 6. Module（ツール実行）
+    │
+    └─ 7. Usage Meter: Record ← 実績記録（成功時のみ）
+```
+
+### なぜHandlerか
+
+| 候補 | 評価 | 理由 |
+|------|------|------|
+| Middleware | ❌ | tools/listなど課金対象外のリクエストも通過する |
+| Permission Gate | ❌ | 権限チェックと使用量制御は責務が異なる |
+| **Handler** | ✅ | `tools/call`の実行前後でフックできる |
+| Module Registry | ❌ | batch実行時に複数回呼ばれる、カウント重複のリスク |
+| Module | ❌ | 各モジュールに実装が分散、漏れのリスク |
+
+### 実装イメージ
+
+```go
+func (h *Handler) handleToolsCall(ctx context.Context, req *ToolsCallRequest) (*ToolsCallResponse, error) {
+    userID := auth.GetUserID(ctx)
+    toolName := req.Module + ":" + req.ToolName
+
+    // 1. Usage Meter: 事前チェック（Quota/Credit）
+    check, err := h.usageMeter.Check(ctx, userID, toolName)
+    if err != nil {
+        return nil, err
+    }
+    if !check.Allowed {
+        return nil, &UsageError{Reason: check.Reason}
+    }
+
+    // 2. ツール実行
+    result, err := h.registry.ExecuteTool(ctx, req)
+    if err != nil {
+        return nil, err
+    }
+
+    // 3. Usage Meter: 実績記録（成功時のみ）
+    if err := h.usageMeter.Record(ctx, userID, toolName); err != nil {
+        // ログに記録、レスポンスは返す（課金記録失敗でユーザー体験を損なわない）
+        h.logger.Error("usage record failed", "error", err)
+    }
+
+    // 4. レスポンスにusage情報を付加
+    result.Usage = check.ToUsageInfo()
+    return result, nil
+}
+```
+
+### batch実行時の扱い
+
+```go
+func (h *Handler) handleBatch(ctx context.Context, req *BatchRequest) (*BatchResponse, error) {
+    userID := auth.GetUserID(ctx)
+
+    // batchは1リクエストとしてカウント（内部の個別ツールはカウントしない）
+
+    // 1. Usage Meter: 事前チェック
+    check, err := h.usageMeter.Check(ctx, userID, "batch")
+    if err != nil {
+        return nil, err
+    }
+    if !check.Allowed {
+        return nil, &UsageError{Reason: check.Reason}
+    }
+
+    // 2. batch実行
+    result, err := h.registry.ExecuteBatch(ctx, req)
+    if err != nil {
+        return nil, err
+    }
+
+    // 3. Usage Meter: 1回だけ記録
+    if err := h.usageMeter.Record(ctx, userID, "batch"); err != nil {
+        h.logger.Error("usage record failed", "error", err)
+    }
+
+    return result, nil
+}
+```
+
+### Usage Meterの責務
+
+| 責務 | 説明 |
+|------|------|
+| **Check** | Quota残量・Credit残高の事前確認 |
+| **Record** | 使用量の記録（usageテーブル）、Credit消費（creditsテーブル） |
+
+### 記録先
+
+| 制御 | テーブル | 用途 |
+|------|----------|------|
+| Quota | `usage` | 月間使用量カウント |
+| Credit | `credits`, `credit_transactions` | クレジット残高、消費履歴 |
+
+詳細は [dsn-subscription.md](./dsn-subscription.md) を参照。
 
 ---
 

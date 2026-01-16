@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "DAY6/dsn-usr-ifc.md",
+                "file": "DAY7/one-week-summary.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "dsn-usr-ifc"
+              "title": "one-week-summary"
             }
           }
         ]
@@ -53,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "batch",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -78,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 276.5,
-    "collapsed": true
+    "width": 276.5
   },
   "right": {
     "id": "c2f92899e43c8028",
@@ -186,6 +185,22 @@
   },
   "active": "6fd2896e6c8ac968",
   "lastOpenFiles": [
+    "DAY7/adr-permission-naming.md",
+    "DAY7/one-week-summary.md",
+    "DAY5/004-spec-dsn/spec-dsn.md",
+    "DAY7/dsn-module-registry.md",
+    "DAY4/spec-ops.md",
+    "DAY5/002-spec-sys/spec-sys.md",
+    "DAY2/ADR-003-meta-tool-lazy-loading.md",
+    "DAY7/dsn-permission-system.md",
+    "DAY4/spec-dsn.md",
+    "DAY3/specification/spec-dsn.md",
+    "DAY4/spec-list.md",
+    "DAY2/spec-MCPist.md",
+    "DAY5/dtl-idx.md",
+    "DAY5/dtl-dsn-cor.md",
+    "DAY5/dtl-core.md",
+    "DAY6/dsn-usr-ifc.md",
     "DAY6/ui-prototype-review.md",
     "DAY6/prompt-fix.md",
     "DAY6/admin-panel-design-1/tsconfig.json",
@@ -210,27 +225,11 @@
     "DAY6/prompt.md",
     "DAY6/sys-inf.jpg",
     "DAY6/ARD-009-ui-design-implementation.md",
-    "DAY6/dsn-usr-ifc.md",
     "DAY6/spec-ifc.md",
     "DAY6/ARD-008-auth-oauth-server-token-vault-supabase.md",
     "DAY6/ARD-001-auth-clerk-tokenvault-auth0.md",
     "DAY3/requirements/req-fnr.md",
     "DAY5/prefixes.md",
-    "DAY5/007-spec-mnl/spec-mnl.md",
-    "DAY5/dtl-mnl-cor.md",
-    "DAY5/dtl-sys-cor.md",
-    "DAY5/dtl-core.md",
-    "DAY3/requirements/req-summary.md",
-    "DAY5/000-spec-idx/spec-list.md",
-    "DAY5/000-spec-idx/spec-index.md",
-    "DAY5/dtl-tst-cor.md",
-    "DAY5/sprint-retrospective-template.md",
-    "DAY5/work-log.md",
-    "DAY0/prototype-review.md",
-    "DAY0/concept-paper.md",
-    "spec-req.md",
-    "spec-sys.md",
-    "ADR-006-module-centric-primitives.md",
-    "ADR-008-llm-api-abstraction.md"
+    "DAY5/007-spec-mnl/spec-mnl.md"
   ]
 }
